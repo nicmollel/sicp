@@ -27,3 +27,31 @@
 
 (define (h n)
   (A 2 n))
+
+;1.3
+(define (sum term a next b)
+  "Sum of a function over range [a,b]"
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+
+;Ex. 1.29 
+;f(a) + 4f(a+h) + 2f(a+2h) + 4(a+3h)....+f(a+nh)
+; 0      1          2          3           n
+(define (simpson-intergral f a b n)
+  "function intergral by Simpson Rule"
+  (define (h)
+    (/(- b a) n))
+  (define (add-h  x)
+    (+ x (h)))
+  (define (sum x yk)
+    (let ((yn (f yk)))
+      (if (> x n)
+          0 
+          (+ (cond ((or (= x 0) (= x n)) yn)
+                 ((even? x) (* 2 yn))
+                 ((* 4 yn)))
+             (sum (+ x 1) (add-h yk))))))
+  (* (/ (h) 3.0)
+     (sum 0 a))) 
