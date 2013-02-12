@@ -169,3 +169,61 @@
         (else (cons (scale-tree (car tree) factor)
                     (scale-tree (cdr tree) factor)))))
 
+;Ex. 2.30
+(define (square-tree tree)
+  "Square leaves of a tree"
+  (cond ((null? tree) tree)
+        ((not (pair? tree)) (sqr tree))
+        (else (cons (square-tree (car tree))
+                    (square-tree (cdr tree))))))
+
+(define (square-tree-map tree)
+  "Square tree maps using map"
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (square-tree-map sub-tree)
+             (sqr sub-tree)))
+       tree))
+
+;Ex. 2.31
+;as above, this can be with recursion or using map. since the name 
+;is tree map, i am gonna use map
+(define (tree-map proc tree)
+  "apply proc to the leave nodes of tree"
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree) 
+             (tree-map proc sub-tree)
+             (proc sub-tree)))
+       tree))
+
+;Ex. 2.32
+(define (subsets s)
+  (if (null? s)
+      (list null)
+      (let ((rest (subsets (cdr s))))
+        (append rest (map (lambda (x) (cons (car s) x))rest)))))
+
+;Sect 2.2.3
+(define (filter predicate sequence)
+  (cond ((null? sequence) null)
+        ((predicate (car sequence))
+         (cons (car sequence)
+               (filter predicate (cdr sequence))))
+        (else (filter predicate (cdr sequence)))))
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
+
+(define (enumerate-interval low high)
+  (if (> low high)
+      null
+      (cons low (enumerate-interval (+ low 1) high))))
+
+(define (enumerate-tree tree)
+  (cond ((null? tree) null)
+        ((not (pair? tree)) (list tree))
+        (else (append (enumerate-tree (car tree))
+                      (enumerate-tree (cdr tree))))))
