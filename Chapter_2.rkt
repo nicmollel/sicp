@@ -324,3 +324,41 @@
 ;Ex 2.42
 ;I don't remember the solution but the 'eight queen' prob gave me some
 ;hard time in my intro classes
+
+;board positions => (row,column)
+(define (adjoin-position row col rest-of-queens)
+  (cons (list row col) (list rest-of-queens)))
+
+(define (safe? kth-col positions)
+  (define (check-diagonal level)
+    (cond ((= level kth-col) positions)
+          ((equal? (list (- (caar positions) level)
+                         (- (cadar positions) level))
+                   (cdr positions)) #f)
+          (else (check-diagonal (+ level 1)))))
+  ;positions is a list of (new-quenn-pos valid-queen-pos)
+  ;if row or valid is the same as new, it's not safe
+  ;col should technically be different 
+  ;if new is in the same diagonal as valid, then it's not safe
+  (let ((new-q (car positions))
+        (others (cdr positions)))
+    (if (null? others)
+        positions
+        (cond (= (car new-q)(car others) #f) ;same row
+              (= kth-col (cadr new-q)(cadr others) #f)
+              ;above is same-col, tho i think it's a redudant check
+              (else (check-diagonal 1))))))
+
+;solution with the gaps
+(define (queens board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (list null) ;empty-board => empty list
+        (filter (lambda(positions)
+                  (safe? k positions))
+                (flatmap (lambda (rest-of-queens)
+                           (map (lambda (new-row)
+                                  (adjoin-position new-row k rest-of-queens))
+                                (enumerate-interval 1 board-size)))
+                         (queen-cols (- k 1))))))
+  (queen-cols board-size))
