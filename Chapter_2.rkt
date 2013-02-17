@@ -1,4 +1,10 @@
 #lang racket
+;use stuff from Chapter 1
+(require "Chapter_1.rkt")
+
+;provide some functions for later Chapters
+(provide gcd
+         )
 
 ;Chapter 2
 ;GCD
@@ -227,3 +233,94 @@
         ((not (pair? tree)) (list tree))
         (else (append (enumerate-tree (car tree))
                       (enumerate-tree (cdr tree))))))
+
+;Ex. 2.33
+(define (accumulate-map p seq)
+    (accumulate (lambda (x y)(cons (p x) y)) null seq))
+ 
+(define(accumulate-append seq1 seq2)
+  (accumulate cons seq2 seq1))
+
+(define (accumulate-length seq)
+  (accumulate (lambda (x y) (+ 1 y)) 0 seq))
+
+;Ex. 2.36
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      null
+      (cons (accumulate op init (map car seqs))
+            (accumulate-n op init (map cdr seqs)))))
+
+;Nested Mappings
+
+;accumulating pairs
+((lambda (n)
+   (accumulate append null `
+               (map (lambda (i)
+                      (map (lambda (j) (list i j))
+                           (enumerate-interval 1 (- i 1))))
+                    (enumerate-interval 1 n)))) 6)
+
+;abstrating mapping and accumulating with append
+(define (flatmap proc seq)
+  (accumulate append null (map proc seq)))
+
+;same procedure as above becomes
+ ((lambda (n)
+    (flatmap (lambda (i)
+               (map (lambda (j) (list i j))
+                    (enumerate-interval 1 (- i 1))))
+             (enumerate-interval 1 n))) 6)
+ 
+(define (prime-sum? pair)
+  (prime? (+ (car pair)(cadr pair))))
+
+(define (make-pair-sum pair)
+  (let ((x (car pair))
+        (y (cadr pair)))
+    (list x y (+ x y))))
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum? 
+               (flatmap (lambda(i)
+                          (map (lambda(j)(list i j))
+                               (enumerate-interval 1 (- i 1))))
+                        (enumerate-interval 1 n)))))
+
+;permuations  of a set presented as a list
+(define (permutations s)
+  (if (null? s)
+      (list s)
+      (flatmap (lambda (x)
+                 (map (lambda (p) (cons x p))
+                      (permutations (remove x s))))
+               s)))
+
+;Ex. 2.40
+;i think unique-pairs has really been defined just that it not use
+;flatmap....and i went ahead and did so above. so below is really
+;a copy of the the anonymous function above with a name
+(define (unique-pairs n)
+  (flatmap (lambda (i)
+             (map (lambda (j) (list i j))
+                  (enumerate-interval 1 (- i 1))))
+           (enumerate-interval 1 n)))
+
+;prime-sum-pairs can now be rewritten as 
+(define (primesum-pairs n)
+  (map make-pair-sum 
+       (filter prime-sum? (unique-pairs n))))
+
+;Ex. 2.41
+;change the filter function from prime-sum? to one that checks if
+;the pair adds to a given sum
+(define (sum-s-pairs n s)
+  (map make-pair-sum 
+       (filter (lambda(p)
+                 (= s (+ (car p) (cadr p))))
+               (unique-pairs n))))
+
+;Ex 2.42
+;I don't remember the solution but the 'eight queen' prob gave me some
+;hard time in my intro classes

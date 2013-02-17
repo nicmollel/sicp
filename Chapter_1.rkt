@@ -1,6 +1,25 @@
 #lang racket
 ;; From SICP
 
+(provide prime?)
+
+;not so efficient implementation of test for primality
+;Sec 1.2.6
+
+(define (prime? n)
+  (= n (smallest-divisor n)))
+
+(define (divides? a b)
+  (= (remainder b a) 0))
+
+(define (find-divisor n test-divisor)
+  (cond ((> (sqr test-divisor) n) n)
+        ((divides? test-divisor n) test-divisor)
+        (else (find-divisor n (+ test-divisor n)))))
+
+(define (smallest-divisor n)
+  (find-divisor n 2))
+
 ;;Ex. 1.10
 (define (A x y)
   "Ackermann's function"
