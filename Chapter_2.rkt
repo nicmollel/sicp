@@ -325,37 +325,38 @@
 ;I don't remember the solution but the 'eight queen' prob gave me some
 ;hard time in my intro classes
 
-(define empty-board (list 0 0))
+(define empty-board null)
 
 ;board positions => (row,column)
 (define (adjoin-position row col rest-of-queens)
   (cons (list row col)  rest-of-queens))
 
 (define (safe? kth-col positions)
-  (define (check-diagonal level)
-    (cond ((= level kth-col) positions)
-          ((equal? (list (- (caar positions) level)
-                         (- (cadar positions) level))
-                   (cdr positions)) #f)
-          (else (check-diagonal (+ level 1)))))
   ;positions is a list of (new-quenn-pos valid-queen-pos)
   ;if row or valid is the same as new, it's not safe
   ;col should technically be different 
   ;if new is in the same diagonal as valid, then it's not safe
-  (if (= kth-col 1)
-      #t
-      (let ((new-q (car positions))
-            (others (cadr positions)))
-        (cond (= (car new-q)(car others) #f) ;same row
-              (= kth-col (cadr new-q)(cadr others) #f)
-              ;above is same-col, tho i think it's a redudant check
-              (else (check-diagonal 1))))))
+
+  ;my solutions was not geting me anywhere so i checked the solution
+  ;for safe? from scheme wiki
+  (define (safe-row?)
+    (null? (filter (lambda(pos)
+                     (= (car pos)(caar positions)))
+                   (cdr positions))))
+  (define (safe-diag?)
+    (null? (filter (lambda(pos)
+                     (= (abs (- (caar positions)(car pos)))
+                        (abs (- (cadar positions)(cadr pos)))))
+                   (cdr positions))))
+  ;this is a neat trick that the row,col difference for diagonals
+  ;is the same! 
+  (and (safe-row?)(safe-diag?)))
 
 ;solution with the gaps
 (define (queens board-size)
   (define (queen-cols k)
     (if (= k 0)
-        (list null) 
+        (list empty-board) 
         (filter (lambda(positions)
                   (safe? k positions))
                 (flatmap (lambda (rest-of-queens)
