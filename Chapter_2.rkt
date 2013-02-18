@@ -116,9 +116,9 @@
 ;something along these lines
 (define (same-parity-long x . rest)
   (define (check-parity proc list)
-      (cond ((null? list) list)
-            ((proc (car list)) (cons (car list) (check-parity proc (cdr list))))
-            (else (check-parity proc (cdr list)))))
+    (cond ((null? list) list)
+          ((proc (car list)) (cons (car list) (check-parity proc (cdr list))))
+          (else (check-parity proc (cdr list)))))
   (if (even? x)
       (cons x (check-parity even? rest))
       (cons x (check-parity odd? rest))))
@@ -152,19 +152,19 @@
 ;deep reverse
 ;I don't like how it complains on (car/cdr '()) as these should be NIL
 (define (deep-reverse items)
-    (cond ((null? items) items)
-          ((pair? (car items))
-           (append (deep-reverse (cdr items)) (list (reverse (car items)))))
-          (else 
-           (append (deep-reverse (cdr items)) (list (car items))))))
+  (cond ((null? items) items)
+        ((pair? (car items))
+         (append (deep-reverse (cdr items)) (list (reverse (car items)))))
+        (else 
+         (append (deep-reverse (cdr items)) (list (car items))))))
 
 ;Ex. 2.28
 (define (fringe items)
-    (cond ((null? items) items)
-          ((pair? (car items))
-           (append (fringe (car items)) (fringe (cdr items))))
-          (else 
-           (append (list(car items)) (fringe (cdr items))))))
+  (cond ((null? items) items)
+        ((pair? (car items))
+         (append (fringe (car items)) (fringe (cdr items))))
+        (else 
+         (append (list(car items)) (fringe (cdr items))))))
 
 ;deep-reverse and fringe are really the same procedure just differ
 ;in the order or processing and the result they return
@@ -236,8 +236,8 @@
 
 ;Ex. 2.33
 (define (accumulate-map p seq)
-    (accumulate (lambda (x y)(cons (p x) y)) null seq))
- 
+  (accumulate (lambda (x y)(cons (p x) y)) null seq))
+
 (define(accumulate-append seq1 seq2)
   (accumulate cons seq2 seq1))
 
@@ -255,7 +255,7 @@
 
 ;accumulating pairs
 ((lambda (n)
-   (accumulate append null `
+   (accumulate append null 
                (map (lambda (i)
                       (map (lambda (j) (list i j))
                            (enumerate-interval 1 (- i 1))))
@@ -266,12 +266,12 @@
   (accumulate append null (map proc seq)))
 
 ;same procedure as above becomes
- ((lambda (n)
-    (flatmap (lambda (i)
-               (map (lambda (j) (list i j))
-                    (enumerate-interval 1 (- i 1))))
-             (enumerate-interval 1 n))) 6)
- 
+((lambda (n)
+   (flatmap (lambda (i)
+              (map (lambda (j) (list i j))
+                   (enumerate-interval 1 (- i 1))))
+            (enumerate-interval 1 n))) 6)
+
 (define (prime-sum? pair)
   (prime? (+ (car pair)(cadr pair))))
 
@@ -325,9 +325,11 @@
 ;I don't remember the solution but the 'eight queen' prob gave me some
 ;hard time in my intro classes
 
+(define empty-board (list 0 0))
+
 ;board positions => (row,column)
 (define (adjoin-position row col rest-of-queens)
-  (cons (list row col) (list rest-of-queens)))
+  (cons (list row col)  rest-of-queens))
 
 (define (safe? kth-col positions)
   (define (check-diagonal level)
@@ -340,10 +342,10 @@
   ;if row or valid is the same as new, it's not safe
   ;col should technically be different 
   ;if new is in the same diagonal as valid, then it's not safe
-  (let ((new-q (car positions))
-        (others (cdr positions)))
-    (if (null? others)
-        positions
+  (if (= kth-col 1)
+      #t
+      (let ((new-q (car positions))
+            (others (cadr positions)))
         (cond (= (car new-q)(car others) #f) ;same row
               (= kth-col (cadr new-q)(cadr others) #f)
               ;above is same-col, tho i think it's a redudant check
@@ -353,7 +355,7 @@
 (define (queens board-size)
   (define (queen-cols k)
     (if (= k 0)
-        (list null) ;empty-board => empty list
+        (list null) 
         (filter (lambda(positions)
                   (safe? k positions))
                 (flatmap (lambda (rest-of-queens)
