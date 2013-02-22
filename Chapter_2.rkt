@@ -134,7 +134,7 @@
 (define (square-list-map items)
   (map sqr items))
 
-;Ex. 2.22 
+;Ex. 2.23
 (define (for-each proc items)
   "apply proc to each item of the list"
   (cond ((null? items) #t)
@@ -365,3 +365,14 @@
                                 (enumerate-interval 1 board-size)))
                          (queen-cols (- k 1))))))
   (queen-cols board-size))
+
+;2.3 Symbolic Data
+
+;Ex. 2.54
+;the simple version here work for lists but fails for atoms
+(define (my-equal? x y)
+  (if (or (not (pair? x))(not (pair? y)))
+      (eq? x y) ;this is for atoms
+      (cond ((and (null? x)(null? y)) #t)
+            ((eq? (car x)(car y))(my-equal? (cdr x)(cdr y)))
+            (else #f))))

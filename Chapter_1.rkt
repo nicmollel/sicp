@@ -74,3 +74,9 @@
              (sum (+ x 1) (add-h yk))))))
   (* (/ (h) 3.0)
      (sum 0 a))) 
+
+
+;Ex. 1.42
+;x -> f(g(x))
+(define (my-compose f g)
+  (lambda (x)(f (g x))))
