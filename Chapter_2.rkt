@@ -371,8 +371,9 @@
 ;Ex. 2.54
 ;the simple version here work for lists but fails for atoms
 (define (my-equal? x y)
-  (if (or (not (pair? x))(not (pair? y)))
-      (eq? x y) ;this is for atoms
-      (cond ((and (null? x)(null? y)) #t)
+  ;this version is suppose to handle numbers better
+  (cond ((and (number? x)(number? y)) (= x y))
+        ((or (not (pair? x))(not (pair? y)))  (eq? x y))
+         ((and (null? x)(null? y)) #t)
             ((eq? (car x)(car y))(my-equal? (cdr x)(cdr y)))
-            (else #f))))
+            (else #f)))
