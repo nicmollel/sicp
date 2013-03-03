@@ -217,6 +217,7 @@
                (filter predicate (cdr sequence))))
         (else (filter predicate (cdr sequence)))))
 
+;;; the built in function like this is foldr
 (define (accumulate op initial sequence)
   (if (null? sequence)
       initial
@@ -388,18 +389,43 @@
 (define (=number? exp num)
   (and (number? exp)(= exp num)))
 
-(define (make-sum a1 a2)
-  (cond ((=number? a1 0) a2)
-        ((=number? a2 0) a1)
-        ((and (number? a1)(number? a2)(+ a1 a2)))
-        (else (list '+ a1 a2))))
+;Ex. 2.57
+;;; Extend the sum and product constructors to handle arbitrary
+;;; number of terms. Really two or more terms
 
-(define (make-product m1 m2)
-  (cond ((or (=number? m1 0)(=number? m2 0)) 0)
-        ((=number? m1 1) m2)
-        ((=number? m2 1) m1)
-        ((and (number? m1)(number? m2))(* m1 m2))
-        (else (list '* m1 m2))))
+;; the implementation gets the job done but does a terrible job at
+;; simplifying the calculations
+
+;this idea was lifted off stack overflow
+(define (make-sum . terms)
+  (define (sum-terms sum tlist)
+    (cond ((null? tlist)(if (= 0 sum) tlist (list sum)))
+          ((number? (car tlist)) (sum-terms (+ sum (car tlist))
+                                           (cdr tlist)))
+          (else(if (null? (car tlist))
+                   (sum-terms sum (cdr tlist))
+                   (cons (car tlist)(sum-terms sum (cdr tlist))))))) 
+  (let ((results (sum-terms 0 terms)))
+    (if (= (length results) 1)
+        (car results)
+        (cons '+ results))))
+
+; would be nice to write the innerds of these two procedures 
+; with one macro and half their size space
+(define (make-product . terms)
+  (define (multiply-terms product tlist)
+    (cond ((null? tlist) (if (= 1 product) tlist (list product)))
+          ((=number? (car tlist) 0) (list 0))
+          ((number? (car tlist))(multiply-terms (* (car tlist))
+                                                (cdr tlist)))
+          (else (if (null? (car tlist))
+                    (multiply-terms product (cdr tlist))
+                    (cons (car tlist)(multiply-terms product 
+                                                     (cdr tlist)))))))
+  (let ((results (multiply-terms 1 terms)))
+    (if (= 1 (length results))
+        (car results)
+        (cons '* results))))
 
 (define (sum? expr)
   (and (pair? expr)(eq? '+ (car expr))))
@@ -408,7 +434,9 @@
   (cadr s))
 
 (define (augend s)
-  (caddr s))
+  (if (> (length s) 3)      
+      (cons '+ (cddr s))
+      (caddr s)))
 
 (define (product? x)
   (and (pair? x)(eq? '* (car x))))
@@ -417,7 +445,9 @@
   (cadr p))
 
 (define (multiplicand p)
-  (caddr p))
+  (if (> (length p) 3)
+      (cons '* (cddr p))
+      (caddr p)))
 
 ;Ex. 2.56
 ;;; extend (deriv...) to be able to deferentiate exponention 
