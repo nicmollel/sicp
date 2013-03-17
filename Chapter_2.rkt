@@ -577,10 +577,16 @@
 ;             (list of all leaf nodes of subtrees) weight)
 
 (define (make-code-tree left right)
-  (list left 
-        right 
-        (append (symbols left)(symbols right))
-        (+ (weight left)(weight right))))
+  ;;update for using with Ex.2.69, what if one of the nodes is
+  ;;null? I reason, return the other 
+  
+  (cond ((null? left) right)
+        ((null? right) left)
+        (else 
+         (list left 
+               right 
+               (append (symbols left)(symbols right))
+               (+ (weight left)(weight right))))))
 
 (define (left-branch tree)
   (car tree))
@@ -612,8 +618,8 @@
       '()
       (let ((pair (car pairs)))
         (adjoin-set (make-leaf (car pair) ;symbol
-                               (cdr pair)) ;weight/frequency  
-                    (make-leaf (cdr pairs))))))
+                               (cadr pair)) ;weight/frequency  
+                    (make-leaf-set (cdr pairs))))))
 
 ;Ex. 2.68
 
@@ -643,3 +649,27 @@
       (append (encode-symbol (car message) tree)
               (encode (cdr message) tree))))
 
+
+;Ex 2.69
+
+;; I wanted to compare the decoding done by sample-tree in Ex. 2.67
+;; and this and noticed this note from the description of the algo
+;; in section 2.3.4
+;; "The algorithm does not always specify a unique tree"
+(define (successive-merge pairs)
+  ;; sort by the last element ie: weight
+  (if (= 1 (length pairs))
+      (car pairs)
+      (let* ((ordered-set (sort pairs < #:key last))
+             ;; the above has not been discussed in the book but i have
+             ;; to see if this works before I can actually implement 
+             ;; something that is within the scope of what has been 
+             ;; explained in the book so far
+             (first (car ordered-set))
+             (second (cadr ordered-set))
+             (rest (cddr ordered-set)))
+        (successive-merge (cons (make-code-tree first second) 
+                                rest)))))
+
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
