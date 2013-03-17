@@ -614,3 +614,32 @@
         (adjoin-set (make-leaf (car pair) ;symbol
                                (cdr pair)) ;weight/frequency  
                     (make-leaf (cdr pairs))))))
+
+;Ex. 2.68
+
+(define (encode-symbol symbol tree)
+  ;; if leaf? and equal to symbol. Return an empty list
+  ;; append right sub-tree search to the left sub-tree
+  ;;
+  (define (encode-1 encoding sub-tree)
+    (cond ((null? sub-tree)(error "Symbol not in tree -- ENCODE-SYMBOL"
+                              symbol))
+          ((leaf? sub-tree)
+             (if (eq? symbol (symbol-leaf sub-tree))
+                 encoding
+                 '()))
+          (else (append
+                 (encode-1 (append encoding '(1))(right-branch sub-tree))
+                 (encode-1 (append encoding '(0))(left-branch sub-tree))))))
+  
+  (let ((code (encode-1 '() tree)))
+    (if (pair? code)
+        code
+        (error "Symbol not in tree -- ENCODE-SYMBOL" symbol))))
+
+(define (encode message tree)
+  (if (null? message)
+      '()
+      (append (encode-symbol (car message) tree)
+              (encode (cdr message) tree))))
+
